@@ -60,6 +60,7 @@ public class CucumberReportGeneratorMojo extends AbstractMojo {
 
     /**
      * Array of JSON files to process
+     *
      * @parameter
      * @required
      */
@@ -77,12 +78,14 @@ public class CucumberReportGeneratorMojo extends AbstractMojo {
 
     /**
      * File where the trends is stored.
+     *
      * @parameter
      */
     private int trendsLimit;
 
     /**
      * File where the trends is stored.
+     *
      * @parameter
      */
     private File trendsFile;
@@ -173,6 +176,8 @@ public class CucumberReportGeneratorMojo extends AbstractMojo {
      */
     private boolean setSkippedAsNotFailing;
 
+    private boolean setPendingAsNotFailing;
+
     @Override
     public void execute() throws MojoExecutionException {
 
@@ -194,7 +199,7 @@ public class CucumberReportGeneratorMojo extends AbstractMojo {
         }
 
         // Find all json files that match json file include pattern...
-        List<String> jsonFilesToProcess = genericFindFiles(inputDirectory,jsonFiles);
+        List<String> jsonFilesToProcess = genericFindFiles(inputDirectory, jsonFiles);
 
         // Find all json files that match classification file include pattern...
         List<String> classificationFilesToProcess = genericFindFiles(classificationDirectory, classificationFiles);
@@ -227,6 +232,10 @@ public class CucumberReportGeneratorMojo extends AbstractMojo {
                 configuration.setNotFailingStatuses(Collections.singleton(Status.SKIPPED));
             }
 
+            if (setPendingAsNotFailing) {
+                configuration.setNotFailingStatuses(Collections.singleton(Status.PENDING));
+            }
+
             if (trendsFile != null) {
                 configuration.setTrends(trendsFile, trendsLimit);
             }
@@ -236,10 +245,10 @@ public class CucumberReportGeneratorMojo extends AbstractMojo {
             Reportable report = reportBuilder.generateReports();
 
             if (checkBuildResult && (report == null || report.getFailedSteps() > 0 ||
-                    (treatScenariosAsFailed && report.getFailedScenarios() > 0) ||
-                    (treatUndefinedAsFailed && report.getUndefinedSteps() > 0) ||
-                    (treatPendingAsFailed && report.getPendingSteps() > 0) ||
-                    (treatSkippedAsFailed && report.getSkippedSteps() > 0))) {
+            (treatScenariosAsFailed && report.getFailedScenarios() > 0) ||
+            (treatUndefinedAsFailed && report.getUndefinedSteps() > 0) ||
+            (treatPendingAsFailed && report.getPendingSteps() > 0) ||
+            (treatSkippedAsFailed && report.getSkippedSteps() > 0))) {
                 throw new MojoExecutionException("BUILD FAILED - Check Report For Details");
             }
 
